@@ -1,0 +1,23 @@
+.page-wrap {
+  .page-wrap-header {
+    background: #fff;
+
+    .ant-breadcrumb {
+      margin-bottom: 10px;
+      font-size: 13px;
+    }
+
+    .ant-page-header {
+      padding: 0;
+      padding-left: 7px;
+
+      .ant-page-header-heading-title {
+        color: #333;
+        font-weight: 500;
+        font-size: 18px;
+        font-family: PingFangSC-Medium Helvetica Neue, Helvetica, Arial, PingFang SC, Heiti SC,
+          Hiragino Sans GB, Microsoft YaHei, sans-serif;
+      }
+    }
+  }
+}
