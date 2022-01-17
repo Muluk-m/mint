@@ -24,7 +24,7 @@ const proxySettings = {
   '/api/xx': {
     target: 'https://xxx.com',
     changeOrigin: true
-  },
+  }
 };
 
 module.exports = handleProxySettings(proxySettings);

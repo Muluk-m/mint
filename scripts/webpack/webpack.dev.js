@@ -23,7 +23,7 @@ module.exports = merge(base, {
     noInfo: true,
     proxy: {
       ...require(paths.appProxySetup)
-    },
+    }
   },
   plugins: [new Webpack.HotModuleReplacementPlugin()],
   optimization: {

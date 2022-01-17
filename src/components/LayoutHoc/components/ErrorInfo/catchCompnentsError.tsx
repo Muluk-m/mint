@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 interface Options {
   info: any;
   errMessage: string;
-  level: 'error' | 'warn';
+  level?: 'error' | 'warn';
 }
 
 function getErrorKey() {

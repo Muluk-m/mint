@@ -9,7 +9,7 @@ async function choosePort(port, host) {
   if (resPort === port) {
     return resPort;
   }
-  
+
   const message =
     process.platform !== 'win32' && port < 1024 && !isRoot()
       ? 'Admin permissions are required to run a server on a port below 1024.'

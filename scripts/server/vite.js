@@ -15,7 +15,7 @@ async function createServer() {
       middlewareMode: 'html'
     }
   });
-  
+
   app.use(vite.middlewares);
 
   app.listen(9000);

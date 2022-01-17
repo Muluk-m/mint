@@ -1,35 +1,85 @@
 import React from 'react';
 import { Router } from '@reach/router';
 import { render } from 'react-dom';
-import { Spin } from 'antd';
 import PageOverview from './PageOverview';
 import EmptyPage from './EmptyPage';
-import pages from '@/config/pages.config';
+import FallLoading from './FallLoading';
 
-type RenderHOC = (config: any) => (App: React.FC<unknown>) => React.FC<unknown>;
+type RenderHOC = (
+  config: any
+) => (App: React.ComponentType<unknown>) => React.ComponentType<unknown>;
+
+interface PageConfig {
+  title: string;
+  entryPath: string;
+  route?: string;
+  children?: PagesConfig;
+}
+
+export interface PagesConfig {
+  [name: string]: PageConfig;
+}
 
 const BASE_PATH = '/';
 
-const getPages = (hoc: RenderHOC) => {
-  return Object.values(pages).map((config) => {
-    const PageComponent = React.lazy(() => import(`../pages/${config.entryPath}`));
+const getChildrenPages = (
+  PageComponent: React.LazyExoticComponent<React.ComponentType<unknown>>,
+  parentConfig: PageConfig
+) => {
+  const Component = (options: any) => {
+    return (
+      <PageComponent {...options}>
+        <Router>
+          {Object.values(parentConfig.children!).map(({ route, ...options }) => {
+            const { entryPath } = options;
+            const childrenPath = `${parentConfig.entryPath}/pages/${entryPath}`;
+            const App = React.lazy(() => import(`@/pages/${childrenPath}`));
 
-    const App: React.FC<any> = hoc
+            const props = {
+              path: route ?? entryPath,
+              ...options
+            };
+
+            return <App key={entryPath} {...props} />;
+          })}
+        </Router>
+      </PageComponent>
+    );
+  };
+
+  return Component;
+};
+
+const getPages = (pagesConfig: PagesConfig, hoc: RenderHOC) =>
+  Object.values(pagesConfig).map((pageConfig) => {
+    const { route, children, ...config } = pageConfig;
+    /**
+     * TODO 后期项目体量大了需要缩小 import() 静态路径的范围
+     * 或者生成绝对路径的 entryPath 文件
+     * 避免webpack打包的chunk体量过大,不益于tree shaking
+     */
+    const PageComponent = React.lazy(() => import(`@/pages/${config.entryPath}`));
+    const path = route ?? config.entryPath;
+
+    const Page =
+      typeof children === 'object' ? getChildrenPages(PageComponent, pageConfig) : PageComponent;
+
+    const App: React.ComponentType<unknown> = hoc
       ? hoc({
           ...config,
-          path: config.entryPath
-        })(PageComponent)
-      : PageComponent;
+          path
+        })(Page)
+      : Page;
 
     return {
       ...config,
-      path: config.route ?? config.entryPath,
+      children,
+      path,
       App
     };
   });
-};
 
-const InitTitleComponent: React.FC<any> = (props) => {
+const PageRouteComponent: React.FC<any> = (props) => {
   const { title, App } = props;
   if (title) {
     document.title = title;
@@ -38,31 +88,21 @@ const InitTitleComponent: React.FC<any> = (props) => {
   return <App {...props} />;
 };
 
-const Loading: React.FC = () => {
-  return (
-    <div
-      style={{
-        display: 'flex',
-        justifyContent: 'center',
-        paddingTop: 300
-      }}
-    >
-      <Spin />
-    </div>
-  );
-};
-
-const pageRenderer = (hoc: RenderHOC) => {
-  const pages = getPages(hoc);
+const pageRenderer = (pagesConfig: PagesConfig, hoc: RenderHOC) => {
+  const pages = getPages(pagesConfig, hoc);
 
   const App: React.FC = () => {
     return (
-      <React.Suspense fallback={<Loading />}>
+      <React.Suspense fallback={<FallLoading />}>
         <Router style={{ height: '100%', width: '100%' }} basepath={BASE_PATH}>
           <PageOverview path='page-overview' pages={pages} />
-          <EmptyPage path=':pagePath' />
-          {pages.map((options) => (
-            <InitTitleComponent key={options.entryPath} {...options} />
+          <EmptyPage default />
+          {pages.map(({ path, ...options }) => (
+            <PageRouteComponent
+              key={options.entryPath}
+              path={options?.children ? `${path}/*` : path}
+              {...options}
+            />
           ))}
         </Router>
       </React.Suspense>

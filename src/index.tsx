@@ -1,15 +1,13 @@
 import pageRenderer from './renderer';
 import LayoutHoc from './components/LayoutHoc';
-import 'antd/dist/antd.less'; // 引入官方提供的 less 样式入口文件
-import '@ss/mtd-react/lib/style/index.css';
-import '@/lib/assets/css/mth-theme.less';
+import pages from './config/pages.config';
 
-const Hoc = (options: unknown) => (Wrap: React.FC<unknown>) => {
+const Hoc = (options: unknown) => (App: React.ComponentType<unknown>) => {
   if (process.env.NODE_ENV === 'development') {
     console.info('%cPageInfo:', 'color: #47B04B; font-weight: 700;', options);
   }
 
-  return LayoutHoc(Wrap) as unknown as React.FC<unknown>;
+  return LayoutHoc(App);
 };
 
 try {
@@ -20,4 +18,4 @@ try {
   //
 }
 
-pageRenderer(Hoc);
+pageRenderer(pages, Hoc);
