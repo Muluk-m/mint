@@ -4,7 +4,7 @@ interface OptionsType {
 }
 
 /**
- * 通过cavans计算字体宽度
+ * 通过canvas计算字体宽度
  */
 class CalculateCanvas {
   canvas: HTMLCanvasElement;

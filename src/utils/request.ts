@@ -1,12 +1,12 @@
 import axios, { AxiosResponse } from 'axios';
 import { message } from 'antd';
-import { AxiosStatic, AxiosResponse as AxiosResponsePrivate } from '@/@types/axios';
+import { AxiosStatic, AxiosResponse as AxiosResponsePrivate } from '@/types/axios';
 
 import config from '../config/axios.config';
 
-const requset = axios.create(config);
+const request = axios.create(config);
 
-requset.interceptors.response.use((response: AxiosResponse<AxiosResponsePrivate<unknown>>) => {
+request.interceptors.response.use((response: AxiosResponse<AxiosResponsePrivate<unknown>>) => {
   switch (String(response.status).slice(0, 1)) {
     case '4':
       message.error(
@@ -30,4 +30,4 @@ requset.interceptors.response.use((response: AxiosResponse<AxiosResponsePrivate<
   return response.data;
 });
 
-export default requset as unknown as AxiosStatic;
+export default request as unknown as AxiosStatic;

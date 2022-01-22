@@ -1,16 +1,17 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const WebpackBar = require('webpackbar');
+const webpack = require('webpack');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
-const lessToJs = require('less-vars-to-js');
-const fs = require('fs');
 const moment = require('moment');
-
 const paths = require('../paths');
-const { resolveApp, resolveModule } = require('../utils');
+
+const { resolveApp, resolveModule, getProcessEnv, getPageDirNames } = require('../utils');
 const { isDevelopment, isProduction } = require('../env');
 const { imageInlineSizeLimit } = require('../config');
+
+const pageDirNames = getPageDirNames();
 
 const getCssLoaders = (importLoaders) => [
   isDevelopment ? 'style-loader' : MiniCssExtractPlugin.loader,
@@ -44,8 +45,33 @@ const getCssLoaders = (importLoaders) => [
   }
 ];
 
+const getEntries = () =>
+  pageDirNames.reduce(
+    (entries, pageDirName) => ({
+      ...entries,
+      [pageDirName]: resolveModule(resolveApp, `src/pages/${pageDirName}/index`)
+    }),
+    {}
+  );
+
+const getHtmlWebpackPlugins = () =>
+  pageDirNames.reduce(
+    (plugins, pageDirName) => [
+      ...plugins,
+      new HtmlWebpackPlugin({
+        title: pageDirName,
+        filename: `${pageDirName}/index.html`,
+        template: 'public/index.html',
+        chunks: [pageDirName],
+        versionTime: moment().utcOffset(8).format('YYYY-MM-DD HH:mm:ss'),
+        inject: true
+      })
+    ],
+    []
+  );
+
 module.exports = {
-  entry: resolveModule(resolveApp, 'src/index'),
+  entry: getEntries(),
   cache: {
     type: 'filesystem',
     buildDependencies: {
@@ -79,9 +105,6 @@ module.exports = {
             options: {
               sourceMap: isDevelopment,
               lessOptions: {
-                modifyVars: lessToJs(
-                  fs.readFileSync(resolveApp('src/lib/assets/css/mth-theme.less'), 'utf8')
-                ),
                 javascriptEnabled: true
               }
             }
@@ -116,13 +139,16 @@ module.exports = {
     ]
   },
   plugins: [
-    new HtmlWebpackPlugin({
-      title: '优选算法平台',
-      template: paths.appHtml,
-      filename: 'index.html',
-      versionTime: moment().utcOffset(8).format('YYYY-MMDD-HH:mm:ss'),
-      inject: true
+    new webpack.DefinePlugin({
+      'process.env': JSON.stringify({
+        ...Object.entries(process.env).reduce(
+          (res, [key, val]) => (/(NODE_ENV|USER_)/.test(key) ? { ...res, [key]: val } : res),
+          {}
+        ),
+        USER_TALOS_ENV: getProcessEnv()
+      })
     }),
+    ...getHtmlWebpackPlugins(),
     new CopyPlugin({
       patterns: [
         {

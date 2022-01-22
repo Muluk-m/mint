@@ -6,4 +6,3 @@ declare interface Window {
 declare interface NodeModule {
   hot: any;
 }
-

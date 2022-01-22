@@ -12,7 +12,6 @@ const { shouldOpenAnalyzer, ANALYZER_HOST, ANALYZER_PORT } = require('../config'
 module.exports = merge(base, {
   mode: 'production',
   devtool: false,
-  // devtool: 'cheap-module-source-map', // TODO 接入raptor后关闭
   target: 'browserslist',
   output: {
     filename: 'js/[name].[contenthash:8].js',

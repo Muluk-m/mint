@@ -25,4 +25,46 @@ function resolveModule(resolveFn, filePath) {
   return resolveFn(`${filePath}.ts`); // default is .ts
 }
 
-module.exports = { resolveApp, resolveModule, moduleFileExtensions };
+const proxyConfig = require(resolveModule(resolveApp, 'config/proxy.config'));
+const pagesPath = resolveApp('src/pages');
+
+function getProcessEnv() {
+  if (process.env.USER_TALOS_ENV) return process.env.USER_TALOS_ENV;
+
+  /**
+   * 本地服务运行时,基于代理地址去区分运行环境
+   */
+  const { target = '' } = proxyConfig || {};
+
+  if (target.includes('.st.com')) return 'st';
+  if (target.includes('.test.com')) return 'test';
+  if (/(.com)/.test(target)) return 'prod';
+  return 'test';
+}
+
+/**
+ * 获取pages目录下所有层级的入口页面的路径
+ * 基于目录下是否包含index文件为基准判断是否为页面
+ */
+function getPageDirNames(pageDirs = '', res = []) {
+  const basePath = path.resolve(pagesPath, pageDirs);
+  const pageDirNames = fs.readdirSync(basePath, { encoding: 'utf8' });
+
+  if (pageDirNames.some((dir) => dir.includes('index'))) return [...res, pageDirs];
+
+  return pageDirNames.reduce((dirNames, dirName) => {
+    const itemPath = pageDirs ? `${pageDirs}/${dirName}` : dirName;
+    const isDirectory = fs.statSync(path.resolve(pagesPath, pageDirs, dirName)).isDirectory();
+    if (isDirectory) return [...dirNames, ...getPageDirNames(itemPath, res)];
+
+    return dirNames;
+  }, res);
+}
+
+module.exports = {
+  resolveApp,
+  resolveModule,
+  getProcessEnv,
+  getPageDirNames,
+  moduleFileExtensions
+};

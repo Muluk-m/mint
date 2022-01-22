@@ -3,8 +3,8 @@ import React, { Component } from 'react';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { Table, Space, Tooltip, TableColumnType, TableProps, Tag } from 'antd';
 import moment from 'moment';
+import Link from 'antd/es/button';
 import CalculateCanvas from '@/utils/calculateCanvas';
-import Link from '../Link';
 import RequestBtn from './components/RequestBtn';
 import { handleMergeQS, getValueType } from './utils';
 

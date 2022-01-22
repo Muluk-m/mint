@@ -1,7 +1,49 @@
 const Webpack = require('webpack');
 const { merge } = require('webpack-merge');
+const chalk = require('chalk');
 const base = require('./webpack.base');
 const paths = require('../paths');
+const { getPageDirNames } = require('../utils');
+
+const pageDirNames = getPageDirNames();
+
+const getProxyConfig = () => {
+  const proxyConfig = require(paths.appProxyConfig);
+
+  const { apiPrefix = [], target = '' } = proxyConfig;
+
+  return apiPrefix.reduce(
+    (config, prefix) => ({
+      ...config,
+      [prefix]: {
+        changeOrigin: true,
+        secure: false,
+        target,
+        pathRewrite(reqPath, req) {
+          /** 输出代理地址 */
+          process.stdout.write(
+            `${chalk.yellow('Proxy')} "${chalk.blue(req.method)} ${req.path}" to "${chalk.green(
+              reqPath
+            )}"\n`
+          );
+          return reqPath;
+        }
+      }
+    }),
+    {}
+  );
+};
+
+const getHistoryApiFallbackRewrites = () => {
+  return pageDirNames.map((dirName) => {
+    const from = new RegExp(dirName === '/' ? '^/' : `^/${dirName}/.*$`);
+    const to = dirName === '/' ? '/' : `/${dirName}/`;
+    return {
+      from,
+      to
+    };
+  });
+};
 
 module.exports = merge(base, {
   mode: 'development',
@@ -13,17 +55,17 @@ module.exports = merge(base, {
     publicPath: process.env.PUBLIC_PATH || '/'
   },
   devServer: {
-    openPage: 'page-overview',
+    openPage: 'page-spa/detail',
     compress: true,
     stats: 'errors-only',
     clientLogLevel: 'silent',
-    historyApiFallback: true,
+    historyApiFallback: {
+      rewrites: getHistoryApiFallbackRewrites()
+    },
     open: true,
     hot: true,
     noInfo: true,
-    proxy: {
-      ...require(paths.appProxySetup)
-    }
+    proxy: getProxyConfig()
   },
   plugins: [new Webpack.HotModuleReplacementPlugin()],
   optimization: {

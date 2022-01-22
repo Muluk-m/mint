@@ -8,7 +8,7 @@
 | action      | diff 新数据源      | 点击事件执行函数 | '—'           |
 | isHide      | 是否隐藏           | boolean          | false         |
 | confirm     | 是否需要二次确定   | boolean          | false         |
-| props       | 操作项组件的 porps | object           | {}            |
+| props       | 操作项组件的 props | object           | {}            |
 | confirmText | 二次确定提示文案   | string           | 确定${name}吗 |
 
 ## Usage

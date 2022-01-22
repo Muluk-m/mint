@@ -1,9 +1,8 @@
 import React from 'react';
 import { Spin } from 'antd';
+import LayoutHoc from '@/components/LayoutHoc';
 
 const FallLoading: React.FC = () => {
-  // TODO fall模型的layout 通过本地缓存拿菜单树
-
   return (
     <div
       style={{
@@ -17,4 +16,4 @@ const FallLoading: React.FC = () => {
   );
 };
 
-export default FallLoading;
+export default LayoutHoc(FallLoading);

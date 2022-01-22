@@ -11,7 +11,8 @@ const LayoutHoc = (App: React.ComponentType<unknown>) => {
     render() {
       return (
         <Layout>
-          <App />
+          <Layout.Sider style={{ height: '100vh' }} />
+          <App {...this.props} />
         </Layout>
       );
     }

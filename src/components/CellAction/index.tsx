@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button, Popconfirm, Dropdown, Menu, Modal } from 'antd';
-import { DownOutlined } from '@/components/Icon';
+import { DownOutlined } from '@ant-design/icons';
 
 export interface DataItemType<R = any> {
   name: string | ((record: R) => string);
@@ -105,7 +105,7 @@ const CellAction: React.FC<CellActionType> = ({ config, maxSize = 3, record }) =
           >
             <Button type='link' style={BUTTON_STYLE} onClick={(e) => e.preventDefault()}>
               更多
-              {/* <DownOutlined /> */}
+              <DownOutlined />
             </Button>
           </Dropdown>
         </>
