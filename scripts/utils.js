@@ -29,7 +29,7 @@ const proxyConfig = require(resolveModule(resolveApp, 'config/proxy.config'));
 const pagesPath = resolveApp('src/pages');
 
 function getProcessEnv() {
-  if (process.env.USER_TALOS_ENV) return process.env.USER_TALOS_ENV;
+  if (process.env.USER_ENV) return process.env.USER_ENV;
 
   /**
    * 本地服务运行时,基于代理地址去区分运行环境
@@ -42,13 +42,28 @@ function getProcessEnv() {
   return 'test';
 }
 
+function verifyDirectory(modules) {
+  const dirList = modules.split(',');
+  const firstDir = fs.readdirSync(path.resolve(pagesPath));
+  for (const dir of dirList)
+    if (!firstDir.includes(dir)) throw new Error(`directory ${dir} not found`);
+}
+
 /**
  * 获取pages目录下所有层级的入口页面的路径
  * 基于目录下是否包含index文件为基准判断是否为页面
  */
 function getPageDirNames(pageDirs = '', res = []) {
   const basePath = path.resolve(pagesPath, pageDirs);
-  const pageDirNames = fs.readdirSync(basePath, { encoding: 'utf8' });
+  const isFirstLevel = pageDirs === '';
+  // 用于独立部署指定目录
+  const specifiedEntry = isFirstLevel && process.env.USER_DEPLOY_PAGES;
+
+  if (specifiedEntry) verifyDirectory(specifiedEntry);
+
+  const pageDirNames = specifiedEntry
+    ? specifiedEntry.split(',')
+    : fs.readdirSync(basePath, { encoding: 'utf8' });
 
   if (pageDirNames.some((dir) => dir.includes('index'))) return [...res, pageDirs];
 

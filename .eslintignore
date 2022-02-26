@@ -2,4 +2,5 @@
 /build
 /dist
 /src/components/schema-form
+/src/components/Cron
 /esbuild

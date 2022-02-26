@@ -1,4 +1,6 @@
 import { useReducer, useRef, useEffect, useState } from 'react';
+import type { useEffect as useEffectType, DependencyList, EffectCallback } from 'react';
+import isEqual from 'lodash/isEqual';
 
 export const useSet = <T = any>(initState: T): [T, React.Dispatch<T>] => {
   const [state, setState] = useReducer((state: T, newState: T) => {
@@ -59,4 +61,41 @@ export const useStorageState = (initState = {}, searchKey = 'SAVES') => {
     localStorage.setItem(searchKey, JSON.stringify(search));
   };
   return [data, setSearchWithStorage] as [typeof data, typeof setSearchWithStorage];
+};
+
+export const useUpdateEffect: typeof useEffectType = (effect, deps) => {
+  const isMounted = useRef(false);
+
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
+  // eslint-disable-next-line consistent-return
+  useEffect(() => {
+    if (!isMounted.current) {
+      isMounted.current = true;
+    } else {
+      return effect();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, deps);
+};
+
+const depsEqual = (aDeps: DependencyList, bDeps: DependencyList = []) => {
+  return isEqual(aDeps, bDeps);
+};
+
+export const useDeepCompareEffect = (effect: EffectCallback, deps: DependencyList) => {
+  const ref = useRef<DependencyList>();
+  const signalRef = useRef<number>(0);
+
+  if (!depsEqual(deps, ref.current)) {
+    ref.current = deps;
+    signalRef.current += 1;
+  }
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(effect, [signalRef.current]);
 };
