@@ -2,7 +2,7 @@ import React from 'react';
 import { Button, Popconfirm, Dropdown, Menu, Modal } from 'antd';
 import { DownOutlined } from '@ant-design/icons';
 
-export interface DataItemType<R = any> {
+export interface ConfigType<R = any> {
   name: string | ((record: R) => string);
   action?: (record: R) => void; // 回调函数
   isHide?: boolean | ((record: R) => boolean); // 是否隐藏
@@ -13,13 +13,13 @@ export interface DataItemType<R = any> {
 }
 
 interface CellActionType<R = any> {
-  config: DataItemType<R>[]; // 数据源
+  configs: ConfigType<R>[]; // 数据源
   maxSize?: number; // 最多展示的操作项,超出渲染到“更多”
   record?: R; // 行数据
 }
 
 type CellRender<R = unknown> = (
-  actionGroup: DataItemType<R>[],
+  actionGroup: ConfigType<R>[],
   record: R
 ) => JSX.Element[] | JSX.Element;
 
@@ -90,8 +90,8 @@ const renderMenuGroup: CellRender = (actionGroup, record) => (
 /**
  * 配置化渲染表格操作列
  */
-const CellAction: React.FC<CellActionType> = ({ config, maxSize = 3, record }) => {
-  const actionGroup = config.filter(({ isHide }: DataItemType<typeof record>) =>
+const CellAction: React.FC<CellActionType> = ({ configs, maxSize = 3, record }) => {
+  const actionGroup = configs.filter(({ isHide }: ConfigType<typeof record>) =>
     typeof isHide === 'function' ? !isHide(record) : !isHide
   );
 
