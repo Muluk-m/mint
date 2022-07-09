@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
 import { message } from 'antd';
-import { AxiosStatic, AxiosResponse as AxiosResponsePrivate } from '@/types/axios';
+import { AxiosStatic, AxiosResponse as AxiosResponsePrivate } from '@/typings/axios';
 
 import config from '../config/axios.config';
 

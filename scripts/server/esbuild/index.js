@@ -83,7 +83,7 @@ async function startServer() {
   try {
     await startExpressServer();
 
-    const nginxConf = path.resolve(__dirname, '../../../.config/', 'nginx.conf');
+    const nginxConf = path.resolve(__dirname, '../../../config/', 'nginx.conf');
     console.log('nginx config:', nginxConf);
     const childProcess = spawn('nginx', ['-c', nginxConf]);
 
